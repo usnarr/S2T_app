@@ -4,7 +4,7 @@ import subprocess
 import os
 import threading
 import time
-
+import whisper
 # Settings for recording
 chunk = 1024
 sample_format = pyaudio.paInt16
@@ -17,7 +17,8 @@ output_dir = "path to the folder where u want to store the recordings and files 
 p = pyaudio.PyAudio()
 tmp_dir = "tmp"
 stream = p.open(format=sample_format, channels=channels, rate=fs, frames_per_buffer=chunk, input=True)
-
+#whisper instance
+model = whisper.load_model("base")
 # Function to save chunk
 def save_chunk(frames, filename):
     filepath = os.path.join(tmp_dir, filename)
@@ -31,10 +32,9 @@ def save_chunk(frames, filename):
 
 # Function to transcribe audio
 def transcribe_audio(filepath):
-    #cmd = [whisper_path, filepath, "--model", "small", "--task", "transcribe",  "--output_dir", output_dir]  # automatically detects language
-    cmd = [whisper_path, filepath, "--model", "small", "--task", "transcribe", "--language", "Polish", "--output_dir", output_dir]
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    print(result.stdout)
+    result = model.transcribe(filepath)
+    print(result)
+    return result
 
 # Main recording loop
 try:
